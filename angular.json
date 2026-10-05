@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "tierlist-generator": {
+    "tierlister": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -18,8 +18,9 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular/build:application",
+          "builder": "@angular-builders/custom-esbuild:application",
           "options": {
+            "plugins": ["./esbuild/typia-plugin.mjs"],
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -29,9 +30,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.scss"
-            ]
+            "styles": ["src/styles.scss"]
           },
           "configurations": {
             "production": {
@@ -58,13 +57,13 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular/build:dev-server",
+          "builder": "@angular-builders/custom-esbuild:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "tierlist-generator:build:production"
+              "buildTarget": "tierlister:build:production"
             },
             "development": {
-              "buildTarget": "tierlist-generator:build:development"
+              "buildTarget": "tierlister:build:development"
             }
           },
           "defaultConfiguration": "development"
