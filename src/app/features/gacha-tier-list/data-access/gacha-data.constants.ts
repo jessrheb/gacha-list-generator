@@ -1,10 +1,10 @@
-export const GACHA_IDENTIFIERS = {
+export const GACHA_IDS = {
   arknights: 'arknights',
   honkaiStarRail: 'honkai-star-rail',
   genshinImpact: 'genshin-impact',
 } as const;
 
-export const DATASETS = {
+export const CATEGORY_IDS = {
   characters: 'characters',
   lightCones: 'light-cones',
-};
+} as const;

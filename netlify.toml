@@ -1,6 +1,6 @@
 [build]
   command = "npm run build"
-  publish = "dist/tierlister/browser"
+  publish = "dist/gacha-tier-list/browser"
 
 [[redirects]]
   from = "/api/*"

@@ -1,13 +1,12 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { Tierlist } from './tierlist/tierlist';
+import { GachaTierList } from './features/gacha-tier-list/gacha-tier-list';
 
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet, Tierlist],
+  selector: 'gacha-root',
+  imports: [GachaTierList],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App {
-  protected readonly title = signal('tierlister');
+  protected readonly title = signal('Gacha Tier List');
 }

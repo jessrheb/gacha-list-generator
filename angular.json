@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "tierlister": {
+    "gacha-tier-list": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -60,10 +60,10 @@
           "builder": "@angular-builders/custom-esbuild:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "tierlister:build:production"
+              "buildTarget": "gacha-tier-list:build:production"
             },
             "development": {
-              "buildTarget": "tierlister:build:development"
+              "buildTarget": "gacha-tier-list:build:development"
             }
           },
           "defaultConfiguration": "development"

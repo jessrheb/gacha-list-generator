@@ -1,11 +1,11 @@
 import {
   BaseStats,
+  HSRPath,
   Localized,
   Name,
   Rarity,
   UniversalFields,
-} from '../shared-types.dto';
-import { HSRPath } from './honkai-star-rail-path.dto';
+} from './shared-types.dto';
 
 type Hero = 'hero';
 

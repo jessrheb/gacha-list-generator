@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Tierlist } from './tierlist';
+import { GachaTierList } from './gacha-tier-list';
 
-describe('Tierlist', () => {
-  let component: Tierlist;
-  let fixture: ComponentFixture<Tierlist>;
+describe('GachaTierList', () => {
+  let component: GachaTierList;
+  let fixture: ComponentFixture<GachaTierList>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Tierlist],
+      imports: [GachaTierList],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Tierlist);
+    fixture = TestBed.createComponent(GachaTierList);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

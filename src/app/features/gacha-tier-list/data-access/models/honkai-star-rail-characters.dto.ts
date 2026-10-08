@@ -1,11 +1,11 @@
 import {
   BaseStats,
-  UniversalFields,
+  HSRPath,
   Localized,
   Name,
   Rarity,
-} from '../shared-types.dto';
-import { HSRPath } from './honkai-star-rail-path.dto';
+  UniversalFields,
+} from './shared-types.dto';
 
 type HSRElement =
   'Physical' | 'Fire' | 'Ice' | 'Lightning' | 'Wind' | 'Quantum' | 'Imaginary';
