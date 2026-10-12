@@ -1,5 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, ResourceRef, signal } from '@angular/core';
 import { GachaData } from './data-access/services/gacha-data';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 @Component({
   imports: [],
@@ -9,5 +10,9 @@ import { GachaData } from './data-access/services/gacha-data';
 })
 export class GachaTierList {
   protected readonly gachaDataService = inject(GachaData);
-  readonly users = signal<[]>([]);
+
+  readonly arknightsResource: ResourceRef<ArknightsCharacter[]> = rxResource({
+    stream: () => this.gachaDataService.getArknightsCharacters(),
+    defaultValue: [],
+  });
 }

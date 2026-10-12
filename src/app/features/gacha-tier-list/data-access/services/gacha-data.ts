@@ -1,80 +1,49 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { fetchAllPages } from '../gacha-data.utils';
-import { Category, GachaDataResponseDTO } from '../models/gacha-data.dto';
+import type { IValidation } from 'typia';
+import { ArknightsCharacter } from '../../models/arknights-characters.model';
 import {
-  assertArknightsCharacters,
-  assertGenshinImpactCharacters,
-  assertHonkaiStarRailCharacters,
-  assertHonkaiStarRailLightCones,
+  validateArknightsCharacters,
+  validateGenshinImpactCharacters,
 } from '../gacha-data-validator';
-import { GACHA_IDS, CATEGORY_IDS } from '../gacha-data.constants';
-import { ArknightsCharacterDTO } from '../models/arknights-characters.dto';
-import { GenshinImpactCharacterDTO } from '../models/genshin-impact-characters.dto';
-import { HonkaiStarRailCharacterDTO } from '../models/honkai-star-rail-characters.dto';
-import { HonkaiStarRailLightConeDTO } from '../models/honkai-star-rail-light-cones.dto';
+import {
+  COLLECTION_IDS,
+  ENDPOINT_PATHS,
+  PAGE_SIZE,
+} from '../gacha-data.constants';
+import { fetchAllPages, validateResponse } from '../gacha-data.utils';
+import { Collection, GachaDataResponse } from '../models/gacha-data.dto';
+import { GachaDataMapping } from './gacha-data-mapping';
 
 @Service()
 export class GachaData {
   protected readonly http = inject(HttpClient);
+  protected readonly gachaDataMappingService = inject(GachaDataMapping);
 
-  private readonly proxyBase: string = '/api';
-  private readonly arknightsCharactersPath: string = `${GACHA_IDS.arknights}/${CATEGORY_IDS.characters}`;
-
-  getArknightsCharacters(): Observable<ArknightsCharacterDTO[]> {
-    return this.fetchFullData(
-      this.arknightsCharactersPath,
-      CATEGORY_IDS.characters,
-      assertArknightsCharacters,
+  getArknightsCharacters(): Observable<ArknightsCharacter[]> {
+    return this.getCollection(
+      COLLECTION_IDS.characters,
+      ENDPOINT_PATHS.arknights.characters,
+      validateArknightsCharacters,
+    ).pipe(
+      map((DTO) => DTO.map(this.gachaDataMappingService.toArknightsCharacter)),
     );
   }
 
-  getGenshinImpactCharacters(): Observable<GenshinImpactCharacterDTO[]> {
-    return this.fetchFullData(
-      `${GACHA_IDS.genshinImpact}/${CATEGORY_IDS.characters}`,
-      CATEGORY_IDS.characters,
-      assertGenshinImpactCharacters,
-    );
-  }
-
-  getHonkaiStarRailCharacters(): Observable<HonkaiStarRailCharacterDTO[]> {
-    return this.fetchFullData(
-      `${GACHA_IDS.honkaiStarRail}/${CATEGORY_IDS.characters}`,
-      CATEGORY_IDS.characters,
-      assertHonkaiStarRailCharacters,
-    );
-  }
-
-  getHonkaiStarRailLightCones(): Observable<HonkaiStarRailLightConeDTO[]> {
-    return this.fetchFullData(
-      `${GACHA_IDS.honkaiStarRail}/${CATEGORY_IDS.lightCones}`,
-      CATEGORY_IDS.lightCones,
-      assertHonkaiStarRailLightCones,
-    );
-  }
-
-  private fetchFullData<T, K extends Category>(
-    path: string,
-    category: K,
-    assert: (input: unknown) => T[],
+  private getCollection<K extends Collection, T>(
+    collection: K,
+    endpointPath: string,
+    validationInput: (input: unknown) => IValidation<GachaDataResponse<K, T>>,
   ): Observable<T[]> {
-    return fetchAllPages<T, K>(
+    return fetchAllPages(
       (offset) =>
         this.http
-          .get<GachaDataResponseDTO<T, K>>(`${this.proxyBase}/${path}`, {
-            params: { offset, limit: 100 },
+          .get<GachaDataResponse<K, T>>(`/api/${endpointPath}`, {
+            params: { offset, limit: PAGE_SIZE },
           })
-          .pipe(
-            map((response) => {
-              const validated = assert(response[category]);
-              return {
-                ...response,
-                [category]: validated,
-              } as GachaDataResponseDTO<T, K>;
-            }),
-          ),
-      category,
+          .pipe(validateResponse(validationInput)),
+      (response) => response[collection],
     );
   }
 }

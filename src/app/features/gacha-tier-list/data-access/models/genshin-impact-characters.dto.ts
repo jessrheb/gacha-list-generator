@@ -4,7 +4,7 @@ import {
   Name,
   Rarity,
   UniversalFields,
-} from './shared-types.dto';
+} from './localization-helper.dto';
 
 type Suffixed<
   BaseType,

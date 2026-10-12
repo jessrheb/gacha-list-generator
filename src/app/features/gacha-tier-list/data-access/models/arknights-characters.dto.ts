@@ -1,26 +1,23 @@
 import {
   BaseStats,
-  Localized,
-  Name,
-  NullableString,
-  Rarity,
-  StringArray,
   UniversalFields,
-} from './shared-types.dto';
+  Rarity,
+} from '../../models/shared-vocabulary.model';
+import {
+  StringArray,
+  Profile,
+  NullableString,
+} from '../../models/type-aliases.model';
+import { Localized } from './localization-helper.dto';
+import { Name, Desc, DescLevels, Branch } from './type-aliases.dto';
 
-type Desc = 'desc';
-type DescLevels = 'descLevels';
-type Branch = 'branch';
-type Profile =
-  'race' | 'birthplace' | 'birthday' | 'height' | 'combatExp' | 'intro';
-
-type DetailSection<SectionTitle extends string, SectionItem> = {
-  title: SectionTitle;
+export type ArknightsDetailSectionDTO<T extends string, I> = {
+  title: T;
   sub: string;
-  items: SectionItem[];
+  items: I[];
 };
 
-type AKClass =
+export type ArknightsClassDTO =
   | 'Vanguard'
   | 'Guard'
   | 'Defender'
@@ -30,51 +27,55 @@ type AKClass =
   | 'Caster'
   | 'Supporter';
 
-type AKPosition = 'Melee' | 'Ranged';
+export type ArknightsPositionDTO = 'Melee' | 'Ranged';
 
-interface AKSkillDetails
+export interface ArknightsSkillDetailsDTO
   extends Localized<Name | Desc>, Localized<DescLevels, StringArray> {
   maxLevel: number;
   slot: string;
 }
 
-interface AKStats extends BaseStats {
+export interface ArknightsStatsDTO extends BaseStats {
   res: number;
   atkInterval: number;
 }
 
-type AKProfile = Localized<Profile>;
+export type ArknightsProfileDTO = Localized<Profile>;
 
-interface AKTalents extends Localized<Name | Desc, NullableString> {
+export interface ArknightsTalentsDTO extends Localized<
+  Name | Desc,
+  NullableString
+> {
   desc: string;
 }
 
-interface AKPotentials {
+export interface ArknightsPotentialsDTO {
   name: string;
   meta: string;
 }
 
-type AKModules = Localized<Name> & Omit<AKPotentials, Name>;
+export type ArknightsModulesDTO = Localized<Name> &
+  Omit<ArknightsPotentialsDTO, Name>;
 
-type AKDetailSections =
-  | DetailSection<'Talents', AKTalents>
-  | DetailSection<'Potentials', AKPotentials>
-  | DetailSection<'Modules', AKModules>;
+export type ArknightsDetailSectionsDTO =
+  | ArknightsDetailSectionDTO<'Talents', ArknightsTalentsDTO>
+  | ArknightsDetailSectionDTO<'Potentials', ArknightsPotentialsDTO>
+  | ArknightsDetailSectionDTO<'Modules', ArknightsModulesDTO>;
 
 export interface ArknightsCharacterDTO
   extends UniversalFields, Localized<Name | Branch> {
   rarity: Rarity;
-  class: AKClass;
-  position: AKPosition;
+  class: ArknightsClassDTO;
+  position: ArknightsPositionDTO;
   dpCost: number;
   blockCount: number;
   redeploy: number;
-  skillDetails: AKSkillDetails[];
-  stats: AKStats;
+  skillDetails: ArknightsSkillDetailsDTO[];
+  stats: ArknightsStatsDTO;
   recruitTags: StringArray;
-  talents: AKTalents[];
+  talents: ArknightsTalentsDTO[];
   potentials: StringArray;
-  profile: AKProfile;
-  detailSections: AKDetailSections[];
+  profile: ArknightsProfileDTO;
+  detailSections: ArknightsDetailSectionsDTO[];
   avail?: string;
 }

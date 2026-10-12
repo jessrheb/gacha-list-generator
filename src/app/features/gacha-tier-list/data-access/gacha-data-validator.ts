@@ -1,17 +1,28 @@
 import typia from 'typia';
+import { GachaDataResponse } from './models/gacha-data.dto';
 import { ArknightsCharacterDTO } from './models/arknights-characters.dto';
 import { GenshinImpactCharacterDTO } from './models/genshin-impact-characters.dto';
 import { HonkaiStarRailCharacterDTO } from './models/honkai-star-rail-characters.dto';
 import { HonkaiStarRailLightConeDTO } from './models/honkai-star-rail-light-cones.dto';
+import { COLLECTION_IDS } from './gacha-data.constants';
 
-export const assertArknightsCharacters =
-  typia.createAssert<ArknightsCharacterDTO[]>();
+type Characters = typeof COLLECTION_IDS.characters;
+type LightCones = typeof COLLECTION_IDS.lightCones;
 
-export const assertGenshinImpactCharacters =
-  typia.createAssert<GenshinImpactCharacterDTO[]>();
+export const validateArknightsCharacters =
+  typia.createValidate<GachaDataResponse<Characters, ArknightsCharacterDTO>>();
 
-export const assertHonkaiStarRailCharacters =
-  typia.createAssert<HonkaiStarRailCharacterDTO[]>();
+export const validateGenshinImpactCharacters =
+  typia.createValidate<
+    GachaDataResponse<Characters, GenshinImpactCharacterDTO>
+  >();
 
-export const assertHonkaiStarRailLightCones =
-  typia.createAssert<HonkaiStarRailLightConeDTO[]>();
+export const validateHonkaiStarRailCharacters =
+  typia.createValidate<
+    GachaDataResponse<Characters, HonkaiStarRailCharacterDTO>
+  >();
+
+export const validateHonkaiStarRailLightCones =
+  typia.createValidate<
+    GachaDataResponse<LightCones, HonkaiStarRailLightConeDTO>
+  >();

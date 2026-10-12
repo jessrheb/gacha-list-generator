@@ -3,6 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "noImplicitAny": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,

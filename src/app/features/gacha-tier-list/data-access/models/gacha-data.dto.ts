@@ -1,12 +1,12 @@
-import { CATEGORY_IDS, GACHA_IDS } from '../gacha-data.constants';
-import { NullableString } from './shared-types.dto';
+import { NullableString } from '../../models/type-aliases.model';
+import { COLLECTION_IDS, GACHA_IDS } from '../gacha-data.constants';
 
-export type GachaList = (typeof GACHA_IDS)[keyof typeof GACHA_IDS];
-export type Category = (typeof CATEGORY_IDS)[keyof typeof CATEGORY_IDS];
+export type Gacha = (typeof GACHA_IDS)[keyof typeof GACHA_IDS];
+export type Collection = (typeof COLLECTION_IDS)[keyof typeof COLLECTION_IDS];
 
-export interface GachaDataDTO {
+export interface GlobalGachaDataDTO {
   count: number;
-  game: GachaList;
+  game: Gacha;
   limit: number;
   offset: number;
   sort: NullableString;
@@ -14,5 +14,5 @@ export interface GachaDataDTO {
   _attribution: string;
 }
 
-export type GachaDataResponseDTO<T, K extends Category> = Record<K, T[]> &
-  GachaDataDTO;
+export type GachaDataResponse<K extends Collection, T> = GlobalGachaDataDTO &
+  Record<K, T[]>;
