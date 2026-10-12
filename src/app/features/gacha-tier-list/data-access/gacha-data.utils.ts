@@ -26,18 +26,19 @@ export function fetchAllPages<R extends GlobalGachaDataDTO, T>(
         : EMPTY;
     }),
     map(extractItems),
-    reduce((accumulator, response) => accumulator.concat(response), [] as T[]),
+    reduce(
+      (accumulation, response) => accumulation.concat(response),
+      [] as T[],
+    ),
   );
 }
 
-export function logValidationError(error: Error) {
-  if (error instanceof TypiaValidationError) {
-    const errorMessage = error.validation.errors
-      .map((error) => `Path: ${error.path}, Expected: ${error.expected}`)
-      .join('; ');
+export function logTypiaValidationError(error: TypiaValidationError) {
+  const errorMessage = error.validation.errors
+    .map((error) => `Path: ${error.path}, Expected: ${error.expected}`)
+    .join('; ');
 
-    console.error(errorMessage);
-  }
+  console.error(errorMessage);
 }
 
 export function validateResponse<R>(
@@ -51,8 +52,9 @@ export function validateResponse<R>(
           throw new TypiaValidationError(validatedResult);
         return validatedResult.data;
       }),
-      catchError((error: Error) => {
-        logValidationError(error);
+      catchError((error: unknown) => {
+        if (error instanceof TypiaValidationError)
+          logTypiaValidationError(error);
         return throwError(() => error);
       }),
     );

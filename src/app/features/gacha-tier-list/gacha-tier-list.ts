@@ -1,6 +1,7 @@
-import { Component, inject, ResourceRef, signal } from '@angular/core';
-import { GachaData } from './data-access/services/gacha-data';
+import { Component, inject, ResourceRef } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { GachaData } from './data-access/gacha-data';
+import { ArknightsCharacter } from './models/arknights-character.model';
 
 @Component({
   imports: [],

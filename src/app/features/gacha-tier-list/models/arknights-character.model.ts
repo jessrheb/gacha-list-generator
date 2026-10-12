@@ -1,5 +1,16 @@
-import { BaseStats, UniversalFields, Rarity } from './shared-vocabulary.model';
-import { StringArray, Profile, NullableString } from './type-aliases.model';
+import {
+  BaseStats,
+  Rarity,
+  UniversalFields,
+} from './shared-gacha-vocabulary.model';
+import {
+  Modules,
+  NullableString,
+  Potentials,
+  Profile,
+  StringArray,
+  Talents,
+} from './type-aliases.model';
 
 export type ArknightsDetailSection<T extends string, I> = {
   title: T;
@@ -39,15 +50,15 @@ export interface ArknightsTalents {
   desc: string;
 }
 
-export interface ArknightsSharedItem {
+export interface ArknightsDetailSectionItem {
   name: string;
   meta: string;
 }
 
 export type ArknightsDetailSections =
-  | ArknightsDetailSection<'Talents', ArknightsTalents>
-  | ArknightsDetailSection<'Potentials', ArknightsSharedItem>
-  | ArknightsDetailSection<'Modules', ArknightsSharedItem>;
+  | ArknightsDetailSection<Talents, ArknightsTalents>
+  | ArknightsDetailSection<Potentials, ArknightsDetailSectionItem>
+  | ArknightsDetailSection<Modules, ArknightsDetailSectionItem>;
 
 export interface ArknightsCharacter extends UniversalFields {
   name: string;

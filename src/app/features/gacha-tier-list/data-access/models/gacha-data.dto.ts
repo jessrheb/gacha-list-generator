@@ -14,5 +14,5 @@ export interface GlobalGachaDataDTO {
   _attribution: string;
 }
 
-export type GachaDataResponse<K extends Collection, T> = GlobalGachaDataDTO &
-  Record<K, T[]>;
+export type GachaDataResponse<P extends Collection, T> = GlobalGachaDataDTO &
+  Record<P, T[]>;
