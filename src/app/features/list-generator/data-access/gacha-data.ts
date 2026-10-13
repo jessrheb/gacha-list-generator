@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
-import { map, Observable, retry, timer } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import type { IValidation } from 'typia';
 import { ArknightsCharacter } from '../models/arknights-character.model';
 import { GenshinImpactCharacter } from '../models/genshin-impact-character.model';
 import { HonkaiStarRailCharacter } from '../models/honkai-star-rail-character.model';
 import { HonkaiStarRailLightCone } from '../models/honkai-star-rail-light-cone.model';
+import { GachaDataCache } from './gacha-data-cache';
 import {
   validateArknightsCharacters,
   validateGenshinImpactCharacters,
@@ -13,8 +14,8 @@ import {
   validateHonkaiStarRailLightCones,
 } from './gacha-data-validator';
 import {
-  COLLECTION_IDS,
-  ENDPOINT_PATHS,
+  COLLECTIONS_DTO_IDS,
+  ENDPOINTS,
   PAGE_SIZE,
 } from './gacha-data.constants';
 import { fetchAllPages, validateResponse } from './gacha-data.utils';
@@ -28,63 +29,61 @@ import { Collection, GachaDataResponse } from './models/gacha-data.dto';
 
 @Service()
 export class GachaData {
+  protected readonly gachaDataCache = inject(GachaDataCache);
   protected readonly http = inject(HttpClient);
 
   getArknightsCharacters(): Observable<ArknightsCharacter[]> {
-    return this.getCollection(
-      COLLECTION_IDS.characters,
-      ENDPOINT_PATHS.arknights.characters,
-      validateArknightsCharacters,
-    ).pipe(map((DTO) => DTO.map(toArknightsCharacter)));
+    return this.gachaDataCache.getCache('aCharacters', () =>
+      this.getCollection(
+        COLLECTIONS_DTO_IDS.characters,
+        ENDPOINTS.arknights.characters,
+        validateArknightsCharacters,
+      ).pipe(map((response) => response.map(toArknightsCharacter))),
+    );
   }
 
   getGenshinImpactCharacters(): Observable<GenshinImpactCharacter[]> {
-    return this.getCollection(
-      COLLECTION_IDS.characters,
-      ENDPOINT_PATHS.genshinImpact.characters,
-      validateGenshinImpactCharacters,
-    ).pipe(map((DTO) => DTO.map(toGenshinImpactCharacter)));
+    return this.gachaDataCache.getCache('gICharacters', () =>
+      this.getCollection(
+        COLLECTIONS_DTO_IDS.characters,
+        ENDPOINTS.genshinImpact.characters,
+        validateGenshinImpactCharacters,
+      ).pipe(map((response) => response.map(toGenshinImpactCharacter))),
+    );
   }
 
   getHonkaiStarRailCharacters(): Observable<HonkaiStarRailCharacter[]> {
-    return this.getCollection(
-      COLLECTION_IDS.characters,
-      ENDPOINT_PATHS.honkaiStarRail.characters,
-      validateHonkaiStarRailCharacters,
-    ).pipe(map((DTO) => DTO.map(toHonkaiStarRailCharacter)));
+    return this.gachaDataCache.getCache('hSRCharacters', () =>
+      this.getCollection(
+        COLLECTIONS_DTO_IDS.characters,
+        ENDPOINTS.honkaiStarRail.characters,
+        validateHonkaiStarRailCharacters,
+      ).pipe(map((response) => response.map(toHonkaiStarRailCharacter))),
+    );
   }
 
   getHonkaiStarRailLightCones(): Observable<HonkaiStarRailLightCone[]> {
-    return this.getCollection(
-      COLLECTION_IDS.lightCones,
-      ENDPOINT_PATHS.honkaiStarRail.lightCones,
-      validateHonkaiStarRailLightCones,
-    ).pipe(map((DTO) => DTO.map(toHonkaiStarRailLightCone)));
+    return this.gachaDataCache.getCache('hSRLightCones', () =>
+      this.getCollection(
+        COLLECTIONS_DTO_IDS.lightCones,
+        ENDPOINTS.honkaiStarRail.lightCones,
+        validateHonkaiStarRailLightCones,
+      ).pipe(map((response) => response.map(toHonkaiStarRailLightCone))),
+    );
   }
 
   private getCollection<P extends Collection, T>(
     collection: P,
-    endpointPath: string,
+    endpoint: string,
     validationInput: (input: unknown) => IValidation<GachaDataResponse<P, T>>,
   ): Observable<T[]> {
     return fetchAllPages(
       (offset) =>
         this.http
-          .get<GachaDataResponse<P, T>>(`/api/${endpointPath}`, {
+          .get<GachaDataResponse<P, T>>(`/api/${endpoint}`, {
             params: { offset, limit: PAGE_SIZE },
           })
-          .pipe(
-            retry({
-              count: 3,
-              delay: (error, retryCount) => {
-                const retryAfter =
-                  error?.error?.retryAfterMs ?? 2 ** retryCount * 1000;
-                return timer(retryAfter);
-              },
-              resetOnSuccess: true,
-            }),
-            validateResponse(validationInput),
-          ),
+          .pipe(validateResponse(validationInput)),
       (response) => response[collection],
     );
   }

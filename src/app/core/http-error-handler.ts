@@ -4,16 +4,32 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Service()
 export class HttpErrorHandler {
-  protected readonly snackBar = inject(MatSnackBar);
+  private readonly snackBar = inject(MatSnackBar);
 
-  handleGlobalError(error: Error): void {
-    console.error(error);
-    this.snackBar.open('Something went wrong.', 'Dismiss', { duration: 5000 });
+  private static readonly DEDUP_WINDOW_MS = 3000;
+  private lastMessage: string | null = null;
+  private lastShownAt = 0;
+
+  private show(message: string, action: string): void {
+    const now = Date.now();
+    if (
+      message === this.lastMessage &&
+      now - this.lastShownAt < HttpErrorHandler.DEDUP_WINDOW_MS
+    ) {
+      return;
+    }
+    this.lastMessage = message;
+    this.lastShownAt = now;
+    this.snackBar.open(message, action, { duration: 5000 });
+  }
+
+  handleGlobalError(error: unknown): void {
+    console.error('[HttpErrorHandler]', error);
+    this.show('Something went wrong.', 'Dismiss');
   }
 
   handleHttpError(error: HttpErrorResponse): void {
-    const message = this.getHttpMessage(error);
-    this.snackBar.open(message, 'Close', { duration: 5000 });
+    this.show(this.getHttpMessage(error), 'Close');
   }
 
   private getHttpMessage(error: HttpErrorResponse): string {
@@ -21,25 +37,27 @@ export class HttpErrorHandler {
       return 'Network error. Please check your connection.';
     }
 
+    const serverMessage = error.error?.message as string | undefined;
+
     switch (error.status) {
       case 400:
-        return 'Bad Request';
+        return serverMessage ?? 'Bad Request';
       case 401:
-        return 'Unauthorized';
+        return serverMessage ?? 'Unauthorized';
       case 403:
-        return 'Forbidden';
+        return serverMessage ?? 'Forbidden';
       case 404:
-        return 'Not Found';
+        return serverMessage ?? 'Not Found';
       case 429:
-        return 'Too Many Requests';
+        return serverMessage ?? 'Too Many Requests';
       case 500:
-        return 'Internal Server Error';
+        return serverMessage ?? 'Internal Server Error';
       case 502:
       case 503:
       case 504:
-        return 'Server temporarily unavailable';
+        return serverMessage ?? 'Server temporarily unavailable';
       default:
-        return 'Unexpected error occurred';
+        return serverMessage ?? 'Unexpected error occurred';
     }
   }
 }

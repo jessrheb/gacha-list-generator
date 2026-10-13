@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GachaTierList } from './gacha-tier-list';
+import { ListGenerator } from './list-generator';
 
-describe('GachaTierList', () => {
-  let component: GachaTierList;
-  let fixture: ComponentFixture<GachaTierList>;
+describe('ListGenerator', () => {
+  let component: ListGenerator;
+  let fixture: ComponentFixture<ListGenerator>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GachaTierList],
+      imports: [ListGenerator],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(GachaTierList);
+    fixture = TestBed.createComponent(ListGenerator);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

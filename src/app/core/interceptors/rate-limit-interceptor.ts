@@ -6,8 +6,11 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
-import { GLOBAL_RATE_LIMIT_CONFIG } from '../rate-limit.config';
-import { RateLimitProperties, RequestState } from '../rate-limit.model';
+import {
+  GLOBAL_RATE_LIMIT_CONFIG,
+  RateLimitProperties,
+  RequestState,
+} from '../rate-limit.config';
 
 function initialState(config: RateLimitProperties, now: number): RequestState {
   return {
@@ -21,6 +24,7 @@ function initialState(config: RateLimitProperties, now: number): RequestState {
 
 const config = GLOBAL_RATE_LIMIT_CONFIG;
 const state = initialState(config, Date.now());
+const { windows } = config;
 
 function rateLimitedError(retryAfterMs: number): HttpErrorResponse {
   return new HttpErrorResponse({
@@ -35,12 +39,11 @@ function reserve(now: number): number {
     return state.serverBlockedUntil - now;
   }
 
-  const { windows } = config;
   let waitMs = 0;
 
-  for (let i = 0; i < windows.length; i++) {
-    const { maxRequests, intervalDuration } = windows[i];
-    const window = state.windows[i];
+  for (let index = 0; index < windows.length; index++) {
+    const { maxRequests, intervalDuration } = windows[index];
+    const window = state.windows[index];
 
     if (now >= window.resetAt) {
       window.count = 0;

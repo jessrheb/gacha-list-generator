@@ -1,5 +1,5 @@
 {
-  "name": "gacha-tier-list",
+  "name": "gacha-list-generator",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -20,6 +20,7 @@
     "@angular/material": "^22.2.0",
     "@angular/platform-browser": "^22.1.0",
     "@angular/router": "^22.1.0",
+    "camelize-ts": "^3.0.0",
     "idb-keyval": "^6.3.0",
     "rxjs": "~7.8.0",
     "true-myth": "^9.4.0",
