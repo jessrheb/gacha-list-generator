@@ -9,6 +9,7 @@ import {
   UniversalFields,
 } from '../../models/shared-gacha-vocabulary.model';
 import {
+  Hero,
   NullableString,
   Profile,
   StringArray,
@@ -22,7 +23,7 @@ interface ArknightsSkillDetailsDTO
   slot: string;
 }
 
-type ArknightsProfileDTO = Localized<Profile>;
+type ArknightsProfileDTO = Partial<Localized<Profile>>;
 
 interface ArknightsTalentsDTO extends Localized<Name | Desc, NullableString> {
   desc: string;
@@ -41,19 +42,20 @@ export type ArknightsDetailSectionsDTO =
   | ArknightsDetailSection<'Modules', ArknightsModulesDTO>;
 
 export interface ArknightsCharacterDTO
-  extends UniversalFields, Localized<Name | Branch> {
+  extends Omit<UniversalFields, Hero>, Localized<Name | Branch> {
+  hero?: string;
   rarity: Rarity;
   class: ArknightsClass;
   position: ArknightsPosition;
   dpCost: number;
   blockCount: number;
   redeploy: number;
-  skillDetails: ArknightsSkillDetailsDTO[];
+  skillDetails?: ArknightsSkillDetailsDTO[];
   stats: ArknightsStats;
   recruitTags: StringArray;
   talents: ArknightsTalentsDTO[];
-  potentials: StringArray;
-  profile: ArknightsProfileDTO;
+  potentials?: StringArray;
+  profile?: ArknightsProfileDTO;
   detailSections: ArknightsDetailSectionsDTO[];
   avail?: string;
 }

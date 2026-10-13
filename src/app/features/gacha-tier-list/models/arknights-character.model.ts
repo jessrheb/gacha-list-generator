@@ -4,6 +4,7 @@ import {
   UniversalFields,
 } from './shared-gacha-vocabulary.model';
 import {
+  Hero,
   Modules,
   NullableString,
   Potentials,
@@ -43,7 +44,7 @@ export interface ArknightsStats extends BaseStats {
   atkInterval: number;
 }
 
-export type ArknightsProfile = Record<Profile, string>;
+export type ArknightsProfile = Partial<Record<Profile, string>>;
 
 export interface ArknightsTalents {
   name: NullableString;
@@ -60,9 +61,10 @@ export type ArknightsDetailSections =
   | ArknightsDetailSection<Potentials, ArknightsDetailSectionItem>
   | ArknightsDetailSection<Modules, ArknightsDetailSectionItem>;
 
-export interface ArknightsCharacter extends UniversalFields {
+export interface ArknightsCharacter extends Omit<UniversalFields, Hero> {
   name: string;
   branch: string;
+  hero?: string;
   rarity: Rarity;
   class: ArknightsClass;
   position: ArknightsPosition;

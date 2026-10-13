@@ -23,13 +23,13 @@ type SuffixedDTO<
 export type GenshinImpactStatsDTO = SuffixedDTO<BaseStats>;
 
 export interface GenshinImpactCharacterDTO
-  extends UniversalFields, Required<Localized<Name>> {
+  extends UniversalFields, Localized<Name> {
   stats: GenshinImpactStatsDTO;
   curve_sel: [number, number, number];
   rarity: Extract<Rarity, 4 | 5>;
   weapon: GenshinImpactWeapon;
-  element: GenshinImpactElement;
-  nation: GenshinImpactNation;
+  element?: GenshinImpactElement;
+  nation?: GenshinImpactNation;
   ascension: GenshinImpactAscension[];
   asc_stat: GenshinImpactAscensionStats;
 }

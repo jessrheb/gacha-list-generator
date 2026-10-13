@@ -57,8 +57,8 @@ export interface GenshinImpactCharacter extends UniversalFields {
   curveSel: [number, number, number];
   rarity: Extract<Rarity, 4 | 5>;
   weapon: GenshinImpactWeapon;
-  element: GenshinImpactElement;
-  nation: GenshinImpactNation;
+  element?: GenshinImpactElement;
+  nation?: GenshinImpactNation;
   ascension: GenshinImpactAscension[];
   ascStat: GenshinImpactAscensionStats;
 }

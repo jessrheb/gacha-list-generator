@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { map, Observable, retry, timer } from 'rxjs';
 import type { IValidation } from 'typia';
 import { ArknightsCharacter } from '../models/arknights-character.model';
 import { GenshinImpactCharacter } from '../models/genshin-impact-character.model';
@@ -18,13 +18,13 @@ import {
   PAGE_SIZE,
 } from './gacha-data.constants';
 import { fetchAllPages, validateResponse } from './gacha-data.utils';
-import { Collection, GachaDataResponse } from './models/gacha-data.dto';
 import { toArknightsCharacter } from './mappers/arknights.mapper';
 import { toGenshinImpactCharacter } from './mappers/genshin-impact.mapper';
 import {
   toHonkaiStarRailCharacter,
   toHonkaiStarRailLightCone,
 } from './mappers/honkai-star-rail.mapper';
+import { Collection, GachaDataResponse } from './models/gacha-data.dto';
 
 @Service()
 export class GachaData {
@@ -73,7 +73,18 @@ export class GachaData {
           .get<GachaDataResponse<P, T>>(`/api/${endpointPath}`, {
             params: { offset, limit: PAGE_SIZE },
           })
-          .pipe(validateResponse(validationInput)),
+          .pipe(
+            retry({
+              count: 3,
+              delay: (error, retryCount) => {
+                const retryAfter =
+                  error?.error?.retryAfterMs ?? 2 ** retryCount * 1000;
+                return timer(retryAfter);
+              },
+              resetOnSuccess: true,
+            }),
+            validateResponse(validationInput),
+          ),
       (response) => response[collection],
     );
   }

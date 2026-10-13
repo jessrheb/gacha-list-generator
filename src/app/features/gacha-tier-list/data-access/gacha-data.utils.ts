@@ -35,7 +35,10 @@ export function fetchAllPages<R extends GlobalGachaDataDTO, T>(
 
 export function logTypiaValidationError(error: TypiaValidationError) {
   const errorMessage = error.validation.errors
-    .map((error) => `Path: ${error.path}, Expected: ${error.expected}`)
+    .map(
+      (error) =>
+        `Path: ${error.path}, Expected: ${error.expected}, Value: ${JSON.stringify(error.value)}`,
+    )
     .join('; ');
 
   console.error(errorMessage);
