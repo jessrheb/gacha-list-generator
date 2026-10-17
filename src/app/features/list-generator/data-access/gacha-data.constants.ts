@@ -1,5 +1,6 @@
 export const OFFSET = 0;
 export const PAGE_SIZE = 100;
+export const VERSION_SEPARATOR = '@v';
 
 export const GACHA_KEYS = {
   arknights: 'arknights',

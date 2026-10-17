@@ -5,7 +5,7 @@ import {
   HttpInterceptorFn,
   HttpRequest,
 } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError, finalize, tap, throwError } from 'rxjs';
 import {
   GLOBAL_RATE_LIMIT_CONFIG,
   RateLimitProperties,
@@ -61,7 +61,9 @@ function reserve(now: number): number {
 }
 
 function release(): void {
-  for (const window of state.windows) window.count--;
+  for (const window of state.windows) {
+    window.count = Math.max(0, window.count - 1);
+  }
 }
 
 function applyServerBackoff(error: HttpErrorResponse): void {
@@ -85,14 +87,23 @@ export const rateLimitInterceptor: HttpInterceptorFn = (
     return throwError(() => rateLimitedError(waitMs));
   }
 
+  let hasSettled = false;
   return next(request).pipe(
+    tap({
+      next: () => {
+        hasSettled = true;
+      },
+      error: () => {
+        hasSettled = true;
+      },
+    }),
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 429) {
-        applyServerBackoff(error);
-      } else if (error.status === 0) {
-        release();
-      }
+      if (error.status === 429) applyServerBackoff(error);
+      else if (error.status === 0) release();
       return throwError(() => error);
+    }),
+    finalize(() => {
+      if (!hasSettled) release();
     }),
   );
 };

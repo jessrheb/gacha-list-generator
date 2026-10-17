@@ -13,19 +13,22 @@ export class RequestQueue {
   }
 
   run<Request>(source: Observable<Request>): Observable<Request> {
-    const subject = new Subject<Request>();
+    return new Observable<Request>((subscriber) => {
+      const subject = new Subject<Request>();
+      const subjectSubscription = subject.subscribe(subscriber);
 
-    this.queue.next(
-      source.pipe(
-        tap({
-          next: (value) => subject.next(value),
-          error: (error) => subject.error(error),
-          complete: () => subject.complete(),
-        }),
-        catchError(() => EMPTY),
-      ),
-    );
+      this.queue.next(
+        source.pipe(
+          tap({
+            next: (v) => subject.next(v),
+            error: (e) => subject.error(e),
+            complete: () => subject.complete(),
+          }),
+          catchError(() => EMPTY),
+        ),
+      );
 
-    return subject.asObservable();
+      return () => subjectSubscription.unsubscribe();
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ResourceRef } from '@angular/core';
+import { Component, inject, ResourceRef } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TierListComponent } from './components/tier-list/tier-list.component';
 import { GachaData } from './data-access/gacha-data';
@@ -13,7 +13,7 @@ import { HonkaiStarRailLightCone } from './models/honkai-star-rail-light-cone.mo
   styleUrl: './list-generator.scss',
   templateUrl: './list-generator.html',
 })
-export class ListGenerator implements OnInit {
+export class ListGenerator {
   protected readonly gachaDataService = inject(GachaData);
 
   readonly arknightsCharacterResource: ResourceRef<ArknightsCharacter[]> =
@@ -36,16 +36,10 @@ export class ListGenerator implements OnInit {
     defaultValue: [],
   });
 
-  /*   readonly honkaiStarRailLightConeResource: ResourceRef<
+  readonly honkaiStarRailLightConeResource: ResourceRef<
     HonkaiStarRailLightCone[]
   > = rxResource({
     stream: () => this.gachaDataService.getHonkaiStarRailLightCones(),
     defaultValue: [],
-  }); */
-
-  ngOnInit(): void {
-    this.gachaDataService
-      .getlightcones()
-      .subscribe((value) => console.log(value));
-  }
+  });
 }

@@ -1,12 +1,24 @@
 import { Service } from '@angular/core';
-import { get, set } from 'idb-keyval';
-import { Observable, from, of, switchMap, tap } from 'rxjs';
-import { GachaCacheEntry, CacheKey } from './models/gacha-data.dto';
+import { del, get, keys, set } from 'idb-keyval';
+import {
+  Observable,
+  finalize,
+  from,
+  map,
+  of,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
+import { VERSION_SEPARATOR } from './gacha-data.constants';
+import { CacheKey, GachaCacheEntry } from './models/gacha-data.dto';
 
 @Service()
 export class GachaDataCache {
   private static readonly TTL_MS = 24 * 60 * 60 * 1000;
-  private static readonly CACHE_VERSION = 2;
+  private static readonly CACHE_VERSION = 1;
+
+  private readonly inFlight = new Map<string, Observable<unknown>>();
+  private purgePromise: Promise<void> | null = null;
 
   getCache<Collection>(
     name: CacheKey,
@@ -14,25 +26,65 @@ export class GachaDataCache {
   ): Observable<Collection> {
     const cacheKey = this.storageCacheKey(name);
 
-    return from(this.read<Collection>(cacheKey)).pipe(
-      switchMap((cachedCollection) =>
-        cachedCollection !== undefined ?
-          of(cachedCollection)
-        : fetch().pipe(tap((data) => void this.write(cacheKey, data))),
+    const existing = this.inFlight.get(cacheKey);
+    if (existing) return existing as Observable<Collection>;
+
+    const stream$ = from(this.ensurePurged()).pipe(
+      switchMap(() => from(this.read<Collection>(cacheKey))),
+      switchMap((cached) =>
+        cached !== undefined ?
+          of(cached)
+        : fetch().pipe(
+            switchMap((data) =>
+              from(this.write(cacheKey, data)).pipe(map(() => data)),
+            ),
+          ),
       ),
+      finalize(() => this.inFlight.delete(cacheKey)),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
+
+    this.inFlight.set(cacheKey, stream$);
+    return stream$;
+  }
+
+  private ensurePurged(): Promise<void> {
+    this.purgePromise ??= this.purgeOldVersions().catch((error) => {
+      console.warn('Cache purge failed', { error });
+    });
+    return this.purgePromise;
+  }
+
+  private async purgeOldVersions(): Promise<void> {
+    const currentSuffix = `${VERSION_SEPARATOR}${GachaDataCache.CACHE_VERSION}`;
+    const allKeys = await keys();
+    const stale = allKeys.filter(
+      (key): key is string =>
+        typeof key === 'string' &&
+        key.includes(VERSION_SEPARATOR) &&
+        !key.endsWith(currentSuffix),
+    );
+    if (stale.length === 0) return;
+    await Promise.all(stale.map((key) => del(key)));
+    console.info(`[cache] Purged ${stale.length} stale cache entries`);
   }
 
   private storageCacheKey(name: CacheKey): string {
-    return `${name}:v${GachaDataCache.CACHE_VERSION}`;
+    return `${name}${VERSION_SEPARATOR}${GachaDataCache.CACHE_VERSION}`;
   }
 
   private async read<Collection>(
     cacheKey: string,
   ): Promise<Collection | undefined> {
     const entry = await get<GachaCacheEntry<Collection>>(cacheKey);
+
     if (!entry) return undefined;
-    if (Date.now() - entry.cachedIn > GachaDataCache.TTL_MS) return undefined;
+
+    if (Date.now() - entry.cachedIn > GachaDataCache.TTL_MS) {
+      void del(cacheKey);
+      return undefined;
+    }
+
     return entry.data;
   }
 
@@ -48,8 +100,12 @@ export class GachaDataCache {
     } catch (error) {
       if (
         error instanceof DOMException &&
-        (error.name === 'QuotaExceededError' || error.name === 'SecurityError')
+        error.name === 'QuotaExceededError'
       ) {
+        console.warn('Cache quota exceeded — collection not persisted', {
+          cacheKey,
+          estimate: await navigator.storage?.estimate?.(),
+        });
         return;
       }
       console.warn('Cache write failed', { cacheKey, error });
