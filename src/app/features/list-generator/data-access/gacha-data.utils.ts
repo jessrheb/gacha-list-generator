@@ -10,12 +10,12 @@ import {
 import type { IValidation } from 'typia';
 import { TypiaValidationError } from '../../../core/errors/typia-validation-error.error';
 import { OFFSET } from './gacha-data.constants';
-import { GlobalGachaDataDTO } from './models/gacha-data.dto';
+import { GachaDataPagedDTO } from './models/gacha-data.dto';
 
-export function fetchAllPages<R extends GlobalGachaDataDTO, T>(
-  fetchPage: (offset: number) => Observable<R>,
-  extractItems: (response: R) => T[],
-): Observable<T[]> {
+export function fetchAllPages<DTOWrapper extends GachaDataPagedDTO<DTO>, DTO>(
+  fetchPage: (offset: number) => Observable<DTOWrapper>,
+  extractItems: (response: DTOWrapper) => DTO[],
+): Observable<DTO[]> {
   return fetchPage(OFFSET).pipe(
     expand((response) => {
       const receivedSoFar = extractItems(response).length;
@@ -27,26 +27,16 @@ export function fetchAllPages<R extends GlobalGachaDataDTO, T>(
     }),
     map(extractItems),
     reduce(
-      (accumulation, response) => accumulation.concat(response),
-      [] as T[],
+      (accumulatedResponse, latestResponse) =>
+        accumulatedResponse.concat(latestResponse),
+      [] as DTO[],
     ),
   );
 }
 
-export function logTypiaValidationError(error: TypiaValidationError) {
-  const errorMessage = error.validation.errors
-    .map(
-      (error) =>
-        `Path: ${error.path}, Expected: ${error.expected}, Value: ${JSON.stringify(error.value)}`,
-    )
-    .join('; ');
-
-  console.error(errorMessage);
-}
-
-export function validateResponse<R>(
-  validate: (input: unknown) => IValidation<R>,
-): (source: Observable<R>) => Observable<R> {
+export function validateResponse<DTOWrapper>(
+  validate: (input: unknown) => IValidation<DTOWrapper>,
+): (source: Observable<DTOWrapper>) => Observable<DTOWrapper> {
   return (source) =>
     source.pipe(
       map((response) => {
@@ -61,4 +51,15 @@ export function validateResponse<R>(
         return throwError(() => error);
       }),
     );
+}
+
+export function logTypiaValidationError(error: TypiaValidationError) {
+  const errorMessage = error.validation.errors
+    .map(
+      (error) =>
+        `Path: ${error.path}, Expected: ${error.expected}, Value: ${JSON.stringify(error.value)}`,
+    )
+    .join('; ');
+
+  console.error(errorMessage);
 }

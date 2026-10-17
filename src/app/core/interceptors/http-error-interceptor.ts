@@ -38,7 +38,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (
   request: HttpRequest<unknown>,
   next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> => {
-  const handler = inject(HttpErrorHandler);
+  const errorHandler = inject(HttpErrorHandler);
 
   return next(request).pipe(
     retryWhen((errors) =>
@@ -53,9 +53,9 @@ export const httpErrorInterceptor: HttpInterceptorFn = (
     ),
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
-        handler.handleHttpError(error);
+        errorHandler.handleHttpError(error);
       } else {
-        handler.handleGlobalError(error);
+        errorHandler.handleGlobalError(error);
       }
       return throwError(() => error);
     }),

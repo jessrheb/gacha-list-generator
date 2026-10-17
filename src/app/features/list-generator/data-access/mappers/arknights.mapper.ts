@@ -27,7 +27,7 @@ export function toArknightsCharacter(
     recruitTags,
     talents,
     potentials,
-    profile,
+    profile: { race, birthplace, birthday, height, combatExp, intro } = {},
     detailSections,
     avail,
   } = DTO;
@@ -58,7 +58,7 @@ export function toArknightsCharacter(
       desc: talent.desc,
     })),
     potentials: potentials ?? [],
-    profile: profile ?? {},
+    profile: { race, birthplace, birthday, height, combatExp, intro },
     detailSections: detailSections.map(toArknightsDetailSection),
     avail,
   } satisfies ArknightsCharacter;

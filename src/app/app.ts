@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { ListGenerator } from './features/list-generator/list-generator';
 
 @Component({
-  selector: 'gacha-root',
+  selector: 'app-root',
   imports: [ListGenerator],
   templateUrl: './app.html',
   styleUrl: './app.scss',

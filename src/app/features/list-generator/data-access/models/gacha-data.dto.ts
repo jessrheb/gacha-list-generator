@@ -1,22 +1,35 @@
 import { NullableString } from '../../models/type-aliases.model';
-import { COLLECTIONS_DTO_IDS, GACHA_DTO_IDS } from '../gacha-data.constants';
+import {
+  COLLECTION_KEYS,
+  ENDPOINT_PATHS,
+  GACHA_KEYS,
+} from '../gacha-data.constants';
+import { CamelizedCacheKey } from './helper-types.dto';
 
-export type Gacha = (typeof GACHA_DTO_IDS)[keyof typeof GACHA_DTO_IDS];
-export type Collection =
-  (typeof COLLECTIONS_DTO_IDS)[keyof typeof COLLECTIONS_DTO_IDS];
+export type Gacha = (typeof GACHA_KEYS)[keyof typeof GACHA_KEYS];
+export type Collection = (typeof COLLECTION_KEYS)[keyof typeof COLLECTION_KEYS];
+export type CacheKey = CamelizedCacheKey<typeof ENDPOINT_PATHS>;
 
-export interface GlobalGachaDataDTO {
-  count: number;
+interface GachaDataBaseDTO {
   game: Gacha;
+  _attribution: string;
+}
+
+export interface GachaDataPagedDTO<CharacterDTO> extends GachaDataBaseDTO {
+  characters: CharacterDTO[];
+  count: number;
   limit: number;
   offset: number;
   sort: NullableString;
   total: number;
-  _attribution: string;
 }
 
-export type GachaDataResponse<P extends Collection, T> = GlobalGachaDataDTO &
-  Record<P, T[]>;
+export interface GachaDataDTO<CollectionDTO> extends GachaDataBaseDTO {
+  data: CollectionDTO[];
+  dataset: Collection;
+}
 
-export type GachaCacheKey =
-  'aCharacters' | 'gICharacters' | 'hSRCharacters' | 'hSRLightCones';
+export interface GachaCacheEntry<Collection> {
+  data: Collection;
+  cachedIn: number;
+}

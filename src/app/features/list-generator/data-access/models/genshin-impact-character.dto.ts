@@ -10,7 +10,7 @@ import {
   GenshinImpactNation,
   GenshinImpactWeapon,
 } from '../../models/genshin-impact-character.model';
-import { Localized } from './localization-helper.dto';
+import { Localized } from './helper-types.dto';
 import { Name } from './type-aliases.dto';
 
 type SuffixedDTO<

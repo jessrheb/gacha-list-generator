@@ -12,8 +12,8 @@ export class RequestQueue {
       .subscribe();
   }
 
-  run<T>(source: Observable<T>): Observable<T> {
-    const subject = new Subject<T>();
+  run<Request>(source: Observable<Request>): Observable<Request> {
+    const subject = new Subject<Request>();
 
     this.queue.next(
       source.pipe(

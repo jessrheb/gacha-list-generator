@@ -8,7 +8,7 @@ import {
   HonkaiStarRailSkillDetails,
   HonkaiStarRailStats,
 } from '../../models/honkai-star-rail-character.model';
-import { Localized } from './localization-helper.dto';
+import { Localized } from './helper-types.dto';
 import { Name } from './type-aliases.dto';
 
 interface HonkaiStarRailSkillDetailsDTO extends HonkaiStarRailSkillDetails {

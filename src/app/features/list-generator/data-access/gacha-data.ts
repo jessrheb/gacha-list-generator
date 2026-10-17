@@ -13,11 +13,7 @@ import {
   validateHonkaiStarRailCharacters,
   validateHonkaiStarRailLightCones,
 } from './gacha-data-validator';
-import {
-  COLLECTIONS_DTO_IDS,
-  ENDPOINTS,
-  PAGE_SIZE,
-} from './gacha-data.constants';
+import { ENDPOINT_PATHS, PAGE_SIZE } from './gacha-data.constants';
 import { fetchAllPages, validateResponse } from './gacha-data.utils';
 import { toArknightsCharacter } from './mappers/arknights.mapper';
 import { toGenshinImpactCharacter } from './mappers/genshin-impact.mapper';
@@ -25,7 +21,7 @@ import {
   toHonkaiStarRailCharacter,
   toHonkaiStarRailLightCone,
 } from './mappers/honkai-star-rail.mapper';
-import { Collection, GachaDataResponse } from './models/gacha-data.dto';
+import { GachaDataDTO, GachaDataPagedDTO } from './models/gacha-data.dto';
 
 @Service()
 export class GachaData {
@@ -33,58 +29,63 @@ export class GachaData {
   protected readonly http = inject(HttpClient);
 
   getArknightsCharacters(): Observable<ArknightsCharacter[]> {
-    return this.gachaDataCache.getCache('aCharacters', () =>
-      this.getCollection(
-        COLLECTIONS_DTO_IDS.characters,
-        ENDPOINTS.arknights.characters,
+    return this.gachaDataCache.getCache('arknightsCharacters', () =>
+      this.getPagedCollection(
+        ENDPOINT_PATHS.arknights.characters,
         validateArknightsCharacters,
       ).pipe(map((response) => response.map(toArknightsCharacter))),
     );
   }
 
   getGenshinImpactCharacters(): Observable<GenshinImpactCharacter[]> {
-    return this.gachaDataCache.getCache('gICharacters', () =>
-      this.getCollection(
-        COLLECTIONS_DTO_IDS.characters,
-        ENDPOINTS.genshinImpact.characters,
+    return this.gachaDataCache.getCache('genshinImpactCharacters', () =>
+      this.getPagedCollection(
+        ENDPOINT_PATHS.genshinImpact.characters,
         validateGenshinImpactCharacters,
       ).pipe(map((response) => response.map(toGenshinImpactCharacter))),
     );
   }
 
   getHonkaiStarRailCharacters(): Observable<HonkaiStarRailCharacter[]> {
-    return this.gachaDataCache.getCache('hSRCharacters', () =>
-      this.getCollection(
-        COLLECTIONS_DTO_IDS.characters,
-        ENDPOINTS.honkaiStarRail.characters,
+    return this.gachaDataCache.getCache('honkaiStarRailCharacters', () =>
+      this.getPagedCollection(
+        ENDPOINT_PATHS.honkaiStarRail.characters,
         validateHonkaiStarRailCharacters,
       ).pipe(map((response) => response.map(toHonkaiStarRailCharacter))),
     );
   }
 
   getHonkaiStarRailLightCones(): Observable<HonkaiStarRailLightCone[]> {
-    return this.gachaDataCache.getCache('hSRLightCones', () =>
-      this.getCollection(
-        COLLECTIONS_DTO_IDS.lightCones,
-        ENDPOINTS.honkaiStarRail.lightCones,
+    return this.gachaDataCache.getCache('honkaiStarRailLightCones', () =>
+      this.getFullCollection(
+        ENDPOINT_PATHS.honkaiStarRail.lightCones,
         validateHonkaiStarRailLightCones,
       ).pipe(map((response) => response.map(toHonkaiStarRailLightCone))),
     );
   }
 
-  private getCollection<P extends Collection, T>(
-    collection: P,
+  private getPagedCollection<DTO>(
     endpoint: string,
-    validationInput: (input: unknown) => IValidation<GachaDataResponse<P, T>>,
-  ): Observable<T[]> {
+    validationInput: (input: unknown) => IValidation<GachaDataPagedDTO<DTO>>,
+  ): Observable<DTO[]> {
     return fetchAllPages(
       (offset) =>
         this.http
-          .get<GachaDataResponse<P, T>>(`/api/${endpoint}`, {
+          .get<GachaDataPagedDTO<DTO>>(`/api/${endpoint}`, {
             params: { offset, limit: PAGE_SIZE },
           })
           .pipe(validateResponse(validationInput)),
-      (response) => response[collection],
+      (response) => response.characters,
+    );
+  }
+
+  private getFullCollection<DTO>(
+    endpoint: string,
+    validationInput: (input: unknown) => IValidation<GachaDataDTO<DTO>>,
+  ): Observable<DTO[]> {
+    return this.http.get<GachaDataDTO<DTO>>(`api/${endpoint}`).pipe(
+      validateResponse(validationInput),
+      map((response) => response.data),
     );
   }
 }

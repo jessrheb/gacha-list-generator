@@ -13,10 +13,10 @@ import {
   Talents,
 } from './type-aliases.model';
 
-export type ArknightsDetailSection<T extends string, I> = {
-  title: T;
+export type ArknightsDetailSection<SectionTitle extends string, SectionItem> = {
+  title: SectionTitle;
   sub: string;
-  items: I[];
+  items: SectionItem[];
 };
 
 export type ArknightsClass =

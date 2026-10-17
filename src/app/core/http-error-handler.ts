@@ -1,17 +1,19 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NgToastService } from 'ng-angular-popup';
 
 @Service()
 export class HttpErrorHandler {
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly ngToast = inject(NgToastService);
 
   private static readonly DEDUP_WINDOW_MS = 3000;
+
   private lastMessage: string | null = null;
   private lastShownAt = 0;
 
-  private show(message: string, action: string): void {
+  private show(message: string): void {
     const now = Date.now();
+
     if (
       message === this.lastMessage &&
       now - this.lastShownAt < HttpErrorHandler.DEDUP_WINDOW_MS
@@ -20,16 +22,16 @@ export class HttpErrorHandler {
     }
     this.lastMessage = message;
     this.lastShownAt = now;
-    this.snackBar.open(message, action, { duration: 5000 });
+    this.ngToast.danger(message);
   }
 
   handleGlobalError(error: unknown): void {
     console.error('[HttpErrorHandler]', error);
-    this.show('Something went wrong.', 'Dismiss');
+    this.show('Something weird happened. Try again later.');
   }
 
   handleHttpError(error: HttpErrorResponse): void {
-    this.show(this.getHttpMessage(error), 'Close');
+    this.show(this.getHttpMessage(error));
   }
 
   private getHttpMessage(error: HttpErrorResponse): string {

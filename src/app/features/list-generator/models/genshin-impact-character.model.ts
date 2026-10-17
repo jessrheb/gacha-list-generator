@@ -1,11 +1,11 @@
 import {
   BaseStats,
-  UniversalFields,
   Rarity,
+  UniversalFields,
 } from './shared-gacha-vocabulary.model';
 
-type Suffixed<T, Suffix extends string = 'Base' | 'Lv90' | 'Lv90Curve'> = {
-  [K in keyof T as `${string & K}${Suffix}`]: T[K];
+type Suffixed<Type, Suffix extends string = 'Base' | 'Lv90' | 'Lv90Curve'> = {
+  [Name in keyof Type as `${Name & string}${Suffix}`]: Type[Name];
 };
 
 export type GenshinImpactStats = Suffixed<BaseStats>;

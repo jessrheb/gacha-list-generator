@@ -14,7 +14,7 @@ import {
   Profile,
   StringArray,
 } from '../../models/type-aliases.model';
-import { Localized } from './localization-helper.dto';
+import { Localized } from './helper-types.dto';
 import { Branch, Desc, DescLevels, Name } from './type-aliases.dto';
 
 interface ArknightsSkillDetailsDTO
