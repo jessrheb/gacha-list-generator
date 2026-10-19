@@ -1,0 +1,11 @@
+<div
+  class="list"
+  cdkDropList
+  [cdkDropListData]="itemsList()"
+  (cdkDropListDropped)="drop($event)">
+  @for (item of itemsList(); track item) {
+  <div class="list-item" cdkDrag>{{ item }}</div>
+  } @empty {
+  <div></div>
+  }
+</div>

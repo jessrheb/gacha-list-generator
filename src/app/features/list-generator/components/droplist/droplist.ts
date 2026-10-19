@@ -1,24 +1,22 @@
-import { Component } from '@angular/core';
 import {
   CdkDrag,
-  CdkDropList,
   CdkDragDrop,
+  CdkDropList,
   moveItemInArray,
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
+import { Component, input } from '@angular/core';
 
 @Component({
-  selector: 'gacha-tier-list',
-  templateUrl: './tier-list.component.html',
-  styleUrl: './tier-list.component.scss',
   imports: [CdkDrag, CdkDropList],
+  selector: 'gacha-droplist',
+  styleUrl: './droplist.scss',
+  templateUrl: './droplist.html',
 })
-export class TierListComponent {
-  todo = ['Get to work', 'Pick up groceries', 'Go home', 'Fall asleep'];
+export class Droplist {
+  readonly itemsList = input<unknown[]>([]);
 
-  done = ['Get up', 'Brush teeth', 'Take a shower', 'Check e-mail', 'Walk dog'];
-
-  drop(event: CdkDragDrop<string[]>): void {
+  drop(event: CdkDragDrop<unknown[]>): void {
     if (event.previousContainer === event.container) {
       moveItemInArray(
         event.container.data,

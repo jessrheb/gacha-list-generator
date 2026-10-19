@@ -29,7 +29,8 @@ export interface GachaDataDTO<CollectionDTO> extends GachaDataBaseDTO {
   dataset: Collection;
 }
 
-export interface GachaCacheEntry<Collection> {
-  data: Collection;
+export interface GachaCacheEntry<Type> {
+  data: Type;
   cachedIn: number;
+  version: number;
 }

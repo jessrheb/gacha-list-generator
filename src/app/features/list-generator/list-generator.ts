@@ -1,6 +1,7 @@
+import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, inject, ResourceRef } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { TierListComponent } from './components/tier-list/tier-list.component';
+import { TierList } from './components/tier-list/tier-list';
 import { GachaData } from './data-access/gacha-data';
 import { ArknightsCharacter } from './models/arknights-character.model';
 import { GenshinImpactCharacter } from './models/genshin-impact-character.model';
@@ -8,7 +9,7 @@ import { HonkaiStarRailCharacter } from './models/honkai-star-rail-character.mod
 import { HonkaiStarRailLightCone } from './models/honkai-star-rail-light-cone.model';
 
 @Component({
-  imports: [TierListComponent],
+  imports: [CdkDropListGroup, TierList],
   selector: 'gacha-list-generator',
   styleUrl: './list-generator.scss',
   templateUrl: './list-generator.html',

@@ -1,0 +1,16 @@
+:host {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 60vw;
+
+  & > .tier-label {
+    align-items: center;
+    border-right: solid 1px #000;
+    display: flex;
+    justify-content: center;
+    min-height: 80px;
+    width: 100px;
+  }
+}

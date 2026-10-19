@@ -9,13 +9,12 @@ import {
   shareReplay,
   switchMap,
 } from 'rxjs';
-import { VERSION_SEPARATOR } from './gacha-data.constants';
 import { CacheKey, GachaCacheEntry } from './models/gacha-data.dto';
 
 @Service()
 export class GachaDataCache {
   private static readonly TTL_MS = 24 * 60 * 60 * 1000;
-  private static readonly CACHE_VERSION = 1;
+  private static readonly CACHE_VERSION = 1.1;
 
   private readonly inFlight = new Map<string, Observable<unknown>>();
   private purgePromise: Promise<void> | null = null;
@@ -25,15 +24,15 @@ export class GachaDataCache {
     fetch: () => Observable<Collection>,
   ): Observable<Collection> {
     const cacheKey = this.storageCacheKey(name);
+    const extantCache = this.inFlight.get(cacheKey);
 
-    const existing = this.inFlight.get(cacheKey);
-    if (existing) return existing as Observable<Collection>;
+    if (extantCache) return extantCache as Observable<Collection>;
 
     const stream$ = from(this.ensurePurged()).pipe(
       switchMap(() => from(this.read<Collection>(cacheKey))),
-      switchMap((cached) =>
-        cached !== undefined ?
-          of(cached)
+      switchMap((cache) =>
+        cache !== undefined ?
+          of(cache)
         : fetch().pipe(
             switchMap((data) =>
               from(this.write(cacheKey, data)).pipe(map(() => data)),
@@ -56,21 +55,34 @@ export class GachaDataCache {
   }
 
   private async purgeOldVersions(): Promise<void> {
-    const currentSuffix = `${VERSION_SEPARATOR}${GachaDataCache.CACHE_VERSION}`;
-    const allKeys = await keys();
-    const stale = allKeys.filter(
-      (key): key is string =>
-        typeof key === 'string' &&
-        key.includes(VERSION_SEPARATOR) &&
-        !key.endsWith(currentSuffix),
+    const allKeys = (await keys()).filter(
+      (key): key is string => typeof key === 'string',
     );
-    if (stale.length === 0) return;
-    await Promise.all(stale.map((key) => del(key)));
-    console.info(`[cache] Purged ${stale.length} stale cache entries`);
+
+    const entries = await Promise.all(
+      allKeys.map(async (key) => ({
+        key,
+        entry: await get<GachaCacheEntry<unknown>>(key),
+      })),
+    );
+
+    const now = Date.now();
+    const staleEntries = entries
+      .filter(
+        ({ entry }) =>
+          entry?.version !== GachaDataCache.CACHE_VERSION ||
+          now - entry.cachedIn > GachaDataCache.TTL_MS,
+      )
+      .map(({ key }) => key);
+
+    if (staleEntries.length === 0) return;
+
+    await Promise.all(staleEntries.map((key) => del(key)));
+    console.info(`Purged ${staleEntries.length} stale cache entries`);
   }
 
   private storageCacheKey(name: CacheKey): string {
-    return `${name}${VERSION_SEPARATOR}${GachaDataCache.CACHE_VERSION}`;
+    return name;
   }
 
   private async read<Collection>(
@@ -79,6 +91,11 @@ export class GachaDataCache {
     const entry = await get<GachaCacheEntry<Collection>>(cacheKey);
 
     if (!entry) return undefined;
+
+    if (entry.version !== GachaDataCache.CACHE_VERSION) {
+      void del(cacheKey);
+      return undefined;
+    }
 
     if (Date.now() - entry.cachedIn > GachaDataCache.TTL_MS) {
       void del(cacheKey);
@@ -94,8 +111,9 @@ export class GachaDataCache {
   ): Promise<void> {
     try {
       await set(cacheKey, {
-        data,
+        version: GachaDataCache.CACHE_VERSION,
         cachedIn: Date.now(),
+        data,
       } satisfies GachaCacheEntry<Collection>);
     } catch (error) {
       if (

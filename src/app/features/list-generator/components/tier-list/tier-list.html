@@ -1,0 +1,25 @@
+<section>
+  @for (label of tierLabels; track $index) {
+  <gacha-tier [tierLabel]="label" />
+  }
+</section>
+
+<section>
+  <form>
+    <mat-form-field>
+      <mat-label>{{ searchLabel}}</mat-label>
+      <input
+        matInput
+        type="text"
+        placeholder="Find a game"
+        [aria-label]="searchLabel"
+        [formField]="gachaSearchForm"
+        [matAutocomplete]="auto" />
+      <mat-autocomplete #auto="matAutocomplete">
+        @for (gacha of gachaOptions(); track gacha) {
+        <mat-option [value]="gacha"> {{ gacha }} </mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+  </form>
+</section>
