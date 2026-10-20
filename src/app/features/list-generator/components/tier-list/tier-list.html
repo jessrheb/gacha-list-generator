@@ -5,21 +5,34 @@
 </section>
 
 <section>
+  <h2>Find a gacha to get started</h2>
   <form>
-    <mat-form-field>
-      <mat-label>{{ searchLabel}}</mat-label>
-      <input
-        matInput
-        type="text"
-        placeholder="Find a game"
-        [aria-label]="searchLabel"
-        [formField]="gachaSearchForm"
-        [matAutocomplete]="auto" />
-      <mat-autocomplete #auto="matAutocomplete">
-        @for (gacha of gachaOptions(); track gacha) {
-        <mat-option [value]="gacha"> {{ gacha }} </mat-option>
-        }
-      </mat-autocomplete>
-    </mat-form-field>
+    <p-floatlabel variant="on">
+      <p-iconfield>
+        <p-inputicon>
+          <svg data-p-icon="search" />
+        </p-inputicon>
+        <p-autocomplete
+          inputId="gacha-search"
+          [formField]="gachaSearchForm"
+          [suggestions]="gachaOptions()"
+          [showClear]="true"
+          [typeahead]="true"
+          (onSelect)="handleSelection($event)"
+          fluid>
+        </p-autocomplete
+      ></p-iconfield>
+      <label for="gacha-search">Gacha</label>
+    </p-floatlabel>
   </form>
+  <p-accordion>
+    @for (gameTitle of selectedGames(); track $index) {
+    <p-accordion-panel [value]="$index">
+      <p-accordion-header>{{ gameTitle }}</p-accordion-header>
+      <p-accordion-content></p-accordion-content>
+    </p-accordion-panel>
+    } @empty {
+    <div></div>
+    }
+  </p-accordion>
 </section>
